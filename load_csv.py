@@ -1,20 +1,22 @@
 import glob
 import csv
-import yaml
 import os
-import pandas as pd
-from os import listdir
-import colorama
-from config import engine, cursor, conn
-# from glob import glob
-from concurrent.futures import ThreadPoolExecutor as ThreadExecutor
-import sqlalchemy as sa
 
+import colorama
+from concurrent.futures import ThreadPoolExecutor as ThreadExecutor
+from dotenv import load_dotenv
+from sqlserver import Database
+
+load_dotenv(".env")
+SQLSERVER_DRIVER = os.environ.get("SQLSERVER_DRIVER")
+DW_SERVER = os.environ.get("DW_SERVER")
+DW_DATABASE = os.environ.get("DW_DATABASE")
+DATA_FOLDER = os.environ.get("DATA_FOLDER")
 
 colorama.init()
 
 
-path = r"C:\Users\m.ivarsson\Desktop\FootballStats\football_data\England\test_data"
+path = r"C:\Users\m.ivarsson\Desktop\billong_football_data\2021\Test"
 
 
 def list_csv_files(path, recursive=True):
@@ -49,14 +51,14 @@ def create_table_definitions(path):
         create_table += ")"
 
         # Create list of result, table_name + query
-        created_tables_list.append([csv_file_name,csv_file_schema, create_table])
+        created_tables_list.append([csv_file_name, csv_file_schema, create_table])
 
     return created_tables_list
 
 
 def execute_create_table():
     created_tables_list = create_table_definitions(path)
-    #print(created_tables_list)
+    print(created_tables_list)
     success = 0
 
     print(f" Start running BDL" )
@@ -69,41 +71,18 @@ def execute_create_table():
        # print(table_name)
 
         try:
-            cursor.execute(sql_query)
-            conn.commit()
+            with Database(SQLSERVER_DRIVER, DW_SERVER, DW_DATABASE, trusted_connection=True) as db:
+                 db.execute(sql_query)
             success += 1
             print(f" Created Table : {table_schema}.{table_name}")
         except:
             print("Error, something went wrong")
 
-
     print(" ")
-    print( f" Total created tables : {success}" )
-
+    print(f" Total created tables : {success}")
 
 
 execute_create_table()
-
-# def create_table_databases():
-#     sql_queries = create_table_definitions(path)
-#     for query in sql_queries:
-#         print(query)
-#
-#         return pd.read_sql_query(query, con=engine)
-
-
-# create_table_databases()
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -152,27 +131,6 @@ def generate_create_table_ddl(self, schema, table, columns):
         logger.error(e)
         logger.error("Failed generating create table script")
 
-
-
-def insert_into_table():
-    query = """
-SELECT 
-div
-,date
-,hometeam
-FROM
-[bdl-land].[dbo].[PL_1920]
-"""
-    return pd.read_sql_query(query, con=engine)
-
-
-        # print(csv_files)
-
-
-
-# print(csv_file_folder)
-    #print(csv_files)
-    #print(csv_file_folder)
 
 
 

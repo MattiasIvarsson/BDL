@@ -4,8 +4,8 @@ from sqlalchemy import create_engine
 import pyodbc
 
 config = {
-    'server': 'localhost\BILLONG' ,
-    'db': 'BDL-land',
+    'server': 'localhost\BILLONG19' ,
+    'db': 'BILLONG_LAND',
     'user': 'admin',
     'pwd': 'T14he5971!'
 }
